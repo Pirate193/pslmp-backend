@@ -79,9 +79,32 @@ export const templates = pgTable("templates",{
     name:text("name").notNull(),
     description:text("description"),
     schemapayload:jsonb("schemapayload").notNull(),
+    ispublic:boolean("isPublic").notNull(),
     createdAt:timestamp("createdAt").defaultNow().notNull(),
     updatedAt:timestamp("updatedAt").defaultNow().notNull(),
 },(table)=>({
     templatesCreatorIdx: t.index("templates_creator_id_idx").on(table.creatorId),
+}))
+
+export const chats = pgTable("chats",{
+    id:uuid("id").defaultRandom().primaryKey(),
+    title:text("title").notNull(),
+    userId:text("userId").notNull().references(()=>user.id,{onDelete:"cascade"}),
+    createdAt:timestamp("createdAt").defaultNow().notNull(),
+    updatedAt:timestamp("updatedAt").defaultNow().notNull(),
+},(table)=>({
+    chatsUserIdx:t.index("chats_user_id_idx").on(table.userId),
+    chatsUpdateAtIdx:t.index("chats_updatedAt_id_idx").on(table.updatedAt)
+})
+)
+
+export const messages = pgTable("messages",{
+    id:uuid("id").defaultRandom().primaryKey(),
+    chatId:text("chatId").notNull().references(()=>chats.id ,{onDelete:"cascade"}),
+    role:text("role").notNull(),
+    content:text("content").notNull(),
+    parts:jsonb("parts").notNull(),
+},(table)=>({
+   messageChatsIdx:t.index("message_chats_id_idx").on(table.chatId)
 }))
 

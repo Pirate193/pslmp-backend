@@ -6,6 +6,9 @@ import { Pool } from "pg";
 import { cors } from 'hono/cors';
 import { auth } from './lib/auth';
 import { requireauth } from './middleware/requireauth';
+import notesRouter from "./routes/noteroute";
+import foldersRouter from "./routes/folderroute";
+import templatesRouter from "./routes/templateroute";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
@@ -37,31 +40,15 @@ app.get('/', (c) => {
   return c.text('pslmp backend is running !')
 })
 
-app.get('/test-db', async (c) => {
-  try {
-    // Attempting a simple query. If the DB is unreachable, this will throw an error.
-    const result = await db.select().from(folders).limit(1)
-    
-    return c.json({ 
-      success: true, 
-      message: "Database connected successfully! We are ready to build.", 
-      data: result 
-    })
-  } catch (error) {
-    console.error("DB Connection Error:", error)
-    return c.json({ 
-      success: false, 
-      message: "Database connection failed. Check Docker.", 
-      error: String(error) 
-    }, 500)
-  }
-})
-
 app.get('/me',requireauth, async(c)=>{
    const user = c.get("user")
    const session = c.get("session")
 
    return c.json({user:user,session:session}) 
 })
+
+app.route('/api/notes',notesRouter);
+app.route('/api/folders',foldersRouter);
+app.route('/api/templates',templatesRouter);
 
 export default app

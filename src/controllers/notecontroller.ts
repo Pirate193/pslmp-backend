@@ -76,9 +76,9 @@ export const updatenote = async (c:Context)=>{
              if(folder.length === 0) return c.json({error:"folder not found"},404)
         }
         const note = await db.update(notes).set({
-            title:body.title,
-            content:body.content,
-            folderId:body.folderId,
+            title:body.title.trim(),
+            content:body.content !== undefined ? body.content : existing[0].content,
+            folderId:body.folderId !== undefined ? body.folderId :existing[0].content,
         }).where(eq(notes.id,id)).returning()
 
      return c.json(note[0],201)
