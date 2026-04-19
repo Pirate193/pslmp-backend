@@ -23,7 +23,7 @@ export const getusersnotes = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in getting users notes "
-        })
+        },500)
     } 
 }
 
@@ -54,7 +54,7 @@ export const createnote = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in creating a note "
-        })
+        },500)
     }
 }
 
@@ -76,10 +76,10 @@ export const updatenote = async (c:Context)=>{
              if(folder.length === 0) return c.json({error:"folder not found"},404)
         }
         const note = await db.update(notes).set({
-            title:body.title.trim(),
+            title:body.title.trim() ?? existing[0].title,
             content:body.content !== undefined ? body.content : existing[0].content,
-            folderId:body.folderId !== undefined ? body.folderId :existing[0].content,
-        }).where(eq(notes.id,id)).returning()
+            folderId:body.folderId !== undefined ? body.folderId :existing[0].folderId,
+        }).where(and(eq(notes.id,id),eq(notes.userId,user.id))).returning()
 
      return c.json(note[0],201)
         
@@ -89,8 +89,7 @@ export const updatenote = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in updating note "
-        })
-        
+        },500)        
     }
 }
 
@@ -112,7 +111,7 @@ export const getnote = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in getting note "
-        })
+        },500)
     }
 }
 export const deletenote = async (c:Context)=>{
@@ -137,7 +136,7 @@ export const deletenote = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in deleting note "
-        })
+        },500)
     }
 }
 
@@ -168,7 +167,7 @@ export const movenote = async (c:Context)=>{
         const updatedNote = await db.update(notes).set({
             folderId: parsedData.folderId ?? null,
             updatedAt: new Date() 
-        }).where(eq(notes.id, id)).returning(); 
+        }).where(and(eq(notes.id, id),eq(notes.userId,user.id))).returning(); 
 
         return c.json(updatedNote[0], 200);
         
@@ -203,7 +202,7 @@ export const getfoldernotes = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in getting foldernotes"
-        })
+        },500)
     }
 }
 

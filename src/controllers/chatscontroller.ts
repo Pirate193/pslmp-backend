@@ -52,6 +52,11 @@ export const getchat = async (c:Context)=>{
         if(!id) return c.json({error:"chat id is required"});
         const safeParse = z.uuid().safeParse(id);
         if(!safeParse.success) return c.json({error:"id is invalid "},500)
+        
+        //security check 
+        const [chat] = await db.select().from(chats)
+         .where(and(eq(chats.id, id), eq(chats.userId, user.id)))
+        if (!chat) return c.json({ error: "chat not found" }, 404)
 
         const chatmessages = await db.select().from(messages).where(eq(messages.chatId,id))
 

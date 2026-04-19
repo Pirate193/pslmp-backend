@@ -2,9 +2,10 @@ import { Hono } from "hono";
 import { Variables } from "hono/types";
 import { requireauth } from "../middleware/requireauth";
 import { createnote, deletenote, getfoldernotes, getnote, getusersnotes, movenote, updatenote } from "../controllers/notecontroller";
+import { Appvariables } from "..";
 
 
-const router = new Hono<{ Variables: Variables }>();
+const router = new Hono<{ Variables: Appvariables }>();
 
 router.use('*',requireauth);
 

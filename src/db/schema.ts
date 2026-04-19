@@ -100,7 +100,7 @@ export const chats = pgTable("chats",{
 
 export const messages = pgTable("messages",{
     id:uuid("id").defaultRandom().primaryKey(),
-    chatId:text("chatId").notNull().references(()=>chats.id ,{onDelete:"cascade"}),
+    chatId:uuid("chatId").notNull().references(()=>chats.id ,{onDelete:"cascade"}),
     role:text("role").notNull(),
     content:text("content").notNull(),
     parts:jsonb("parts").notNull(),

@@ -20,7 +20,7 @@ export const getmytemplates = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in getting your templates "
-        })
+        },500)
     }
 }
 
@@ -35,7 +35,7 @@ export const getCommunitytemplates = async(c:Context)=>{
             success:false,
             error:error,
             message:"error in getting community templates "
-        })
+        },500)
     }
 }
 
@@ -64,7 +64,7 @@ export const createtemplate = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in creating templates "
-        })
+        },500)
     }
 }
 
@@ -85,7 +85,7 @@ export const createtemplatefromnote = async (c:Context)=>{
         const [template] = await db.insert(templates).values({
             creatorId:user.id,
             name:body.name.trim(),
-            description:body.description.trim(),
+            description:body.description?.trim() ?? null,
             schemapayload:note.content,
             ispublic:body.ispublic
         }).returning();
@@ -97,7 +97,7 @@ export const createtemplatefromnote = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in creatingtemplates from note "
-        })
+        },500)
     }
 }
 
@@ -113,7 +113,7 @@ export const applytemplate = async (c:Context) =>{
 
         const [template] = await db.select().from(templates).where(eq(templates.id,id))
 
-        if(!template) return c.json({error:"template not found"},401);
+        if(!template) return c.json({error:"template not found"},404);
         if (template.creatorId !== user.id && !template.ispublic) {
          return c.json({ error: "Forbidden" }, 403);
         }
@@ -142,7 +142,7 @@ export const applytemplate = async (c:Context) =>{
             success:false,
             error:error,
             message:"error in applying templates "
-        })
+        },500)
     }
 }
 
@@ -156,7 +156,8 @@ export const updatetemplate = async (c:Context)=>{
         const uuidCheck = z.uuid().safeParse(id);
         if (!uuidCheck.success) return c.json({ error: "Invalid ID format" }, 400);
         
-        const [template] = await db.select().from(templates).where(eq(templates.id,id));
+        const [template] = await db.select().from(templates)
+         .where(and(eq(templates.id, id), eq(templates.creatorId, user.id)))
         
         if(!template) return c.json({error:"template not found"},401);
 
@@ -175,7 +176,7 @@ export const updatetemplate = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in updating templates "
-        })
+        },500)
     }
 }
 
@@ -200,7 +201,7 @@ export const deletetemplate = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in deleting templates "
-        })
+        },500)
     }
 }
 
@@ -228,6 +229,6 @@ export const gettemplate = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in getting templates "
-        })
+        },500)
     }
 }

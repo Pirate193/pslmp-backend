@@ -9,7 +9,7 @@ import { requireauth } from './middleware/requireauth';
 import notesRouter from "./routes/noteroute";
 import foldersRouter from "./routes/folderroute";
 import templatesRouter from "./routes/templateroute";
-import chatRouter from "./routes/chatscontroller";
+import chatRouter from "./routes/chatsroutes";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
@@ -17,12 +17,12 @@ const pool = new Pool({
 export const db = drizzle({ client: pool });
 
 // Extend Hono's context type so c.get("user") is typed and access  relevant docs to set this up i used docs  in https://better-auth.com/docs/integrations/hono 
-type Variables = {
+export type Appvariables = {
   user: typeof auth.$Infer.Session.user;
   session: typeof auth.$Infer.Session.session;
 };
 
-const app = new Hono<{ Variables: Variables }>();
+const app = new Hono<{ Variables: Appvariables }>();
 app.use(
 	"*", 
 	cors({

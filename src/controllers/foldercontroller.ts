@@ -27,7 +27,7 @@ export const createfolder = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in creating folder "
-        })
+        },500)
     }
 }
 
@@ -58,7 +58,7 @@ export const updatefolder = async (c:Context)=>{
             name: body.name !== undefined ? body.name :existing.name,
             parentId:body.parentId !== undefined ? body.parentId : existing.parentId,
             updatedAt: new Date
-        }).where(eq(folders.id,id)).returning();
+        }).where(and(eq(folders.id,id),eq(folders.userId,user.id))).returning();
 
         return c.json(updatedfolder,200)
         
@@ -68,7 +68,7 @@ export const updatefolder = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in updating folder "
-        })
+        },500)
     }
 }
 
@@ -84,7 +84,7 @@ export const deletefolder = async (c:Context)=>{
         const [existing] = await db.select().from(folders).where(and(eq(folders.id,id),eq(folders.userId,user.id)))
         if(!existing) return c.json({error:"folder not found"},404);
 
-        await db.delete(folders).where(eq(folders.id,id));
+        await db.delete(folders).where(and(eq(folders.id, id), eq(folders.userId, user.id)));
 
         return c.json({success:true},200)
 
@@ -94,7 +94,7 @@ export const deletefolder = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in deleting folder "
-        })
+        },500)
     }
 }
 
@@ -111,6 +111,6 @@ export const getusersfolders = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in fetching folder "
-        })
+        },500)
     }
 }
