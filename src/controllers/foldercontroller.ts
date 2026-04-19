@@ -11,7 +11,7 @@ export const createfolder = async (c:Context)=>{
         const body = await c.req.json();
 
         if(body.parentId){
-          const [parent] = await db.select().from(folders).where(and(eq(folders.parentId,body.parentId),eq(folders.userId,user.id)))
+          const [parent] = await db.select().from(folders).where(and(eq(folders.id,body.parentId),eq(folders.userId,user.id)))
           if (!parent) return c.json({error:"parent id does not exist "},404)
         }
         const [folder]= await db.insert(folders).values({

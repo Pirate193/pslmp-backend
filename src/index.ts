@@ -9,6 +9,7 @@ import { requireauth } from './middleware/requireauth';
 import notesRouter from "./routes/noteroute";
 import foldersRouter from "./routes/folderroute";
 import templatesRouter from "./routes/templateroute";
+import chatRouter from "./routes/chatscontroller";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
@@ -50,5 +51,6 @@ app.get('/me',requireauth, async(c)=>{
 app.route('/api/notes',notesRouter);
 app.route('/api/folders',foldersRouter);
 app.route('/api/templates',templatesRouter);
+app.route('/api/chat',chatRouter);
 
 export default app

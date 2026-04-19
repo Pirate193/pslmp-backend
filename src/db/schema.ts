@@ -1,4 +1,4 @@
-import { boolean, index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { AnyPgColumn, boolean, index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import * as t from "drizzle-orm/pg-core";
 
 //the user,session,account,verification are copied from the better auth docs see:https://better-auth.com/docs/concepts/database#core-schema 
@@ -53,7 +53,7 @@ export const folders = pgTable("folders",{
     id:uuid("id").defaultRandom().primaryKey(),
     userId:text("userId").notNull().references(()=>user.id,{onDelete:"cascade"}),
     name:text("name").notNull(),
-    parentId: uuid("parentId"), // For nested folders
+    parentId: uuid("parentId").references((): AnyPgColumn => folders.id, { onDelete: "cascade" }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 },(table)=>({

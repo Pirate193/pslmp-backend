@@ -1,7 +1,7 @@
 import { Context } from "hono";
 import { db } from "..";
 import { notes, templates } from "../db/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import z from "zod";
 import { error } from "better-auth/api";
 
@@ -119,13 +119,15 @@ export const applytemplate = async (c:Context) =>{
         }
 
 
+       
         if(body.noteId){
-            const [note] = await db.update(notes).set({
-                content:template.schemapayload,
-                updatedAt:new Date()
-            }).where(eq(notes.id,body.noteId)).returning();
+           const [note] = await db.update(notes).set({
+            content: template.schemapayload,
+            updatedAt: new Date() 
+        }).where(and(eq(notes.id, body.noteId), eq(notes.userId, user.id))).returning(); // Added the security check!
 
-            return c.json(note,200)
+        if(!note) return c.json({error: "Note not found or unauthorized"}, 404);
+        return c.json(note, 200)
         }
         const [note] = await db.insert(notes).values({
             userId:user.id,
@@ -211,7 +213,12 @@ export const gettemplate = async (c:Context)=>{
         const uuidCheck = z.uuid().safeParse(id);
         if (!uuidCheck.success) return c.json({ error: "Invalid ID format" }, 400);
 
-        const [template]= await db.select().from(templates).where(and(eq(templates.id,id),eq(templates.creatorId,user.id)))
+        const [template]= await db.select().from(templates).where(
+         and(
+        eq(templates.id, id),
+        or(eq(templates.creatorId, user.id), eq(templates.ispublic, true)) // Allow if owner OR public
+         )
+         )
         if(!template) return c.json({error:"template not found"},401);
 
         return c.json(template,200)
