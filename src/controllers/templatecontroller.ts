@@ -1,9 +1,8 @@
 import { Context } from "hono";
-import { db } from "..";
+import { db } from "../lib/db";
 import { notes, templates } from "../db/schema";
 import { and, desc, eq, or } from "drizzle-orm";
 import z from "zod";
-import { error } from "better-auth/api";
 
 
 export const getmytemplates = async (c:Context)=>{

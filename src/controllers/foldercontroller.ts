@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { db } from "..";
+import { db } from "../lib/db";
 import { folders, notes } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import z, { success } from "zod";
@@ -18,6 +18,8 @@ export const createfolder = async (c:Context)=>{
             userId:user.id,
             name:body.name,
             parentId:body.parentId ?? null,
+            isPinned:body.isPinned ?? false,
+            color:body.color ?? "default",
         }).returning();
 
         return c.json(folder,201)
@@ -57,7 +59,9 @@ export const updatefolder = async (c:Context)=>{
         const [updatedfolder] = await db.update(folders).set({
             name: body.name !== undefined ? body.name :existing.name,
             parentId:body.parentId !== undefined ? body.parentId : existing.parentId,
-            updatedAt: new Date
+            isPinned:body.isPinned !== undefined ? body.isPinned : existing.isPinned,
+            color:body.color !== undefined ? body.color : existing.color,
+            updatedAt: new Date()
         }).where(and(eq(folders.id,id),eq(folders.userId,user.id))).returning();
 
         return c.json(updatedfolder,200)
@@ -104,6 +108,30 @@ export const getusersfolders = async (c:Context)=>{
         const usersfolders = await db.select().from(folders).where(eq(folders.userId,user.id));
 
         return c.json(usersfolders,200)
+        
+    } catch (error) {
+        console.log("error in fetching folder",error);
+        return c.json({
+            success:false,
+            error:error,
+            message:"error in fetching folder "
+        },500)
+    }
+}
+
+export const getfolderbyid = async (c:Context)=>{
+    try {
+        const user = c.get("user");
+        const id = c.req.param("id");
+
+        if(!id) return c.json({error:"id is required for fetching folder"},500);
+
+        const uuidCheck = z.uuid().safeParse(id);
+        if (!uuidCheck.success) return c.json({ error: "Invalid ID format" }, 400);
+        const [folder] = await db.select().from(folders).where(and(eq(folders.id,id),eq(folders.userId,user.id)))
+        if(!folder) return c.json({error:"folder not found"},404);
+
+        return c.json(folder,200)
         
     } catch (error) {
         console.log("error in fetching folder",error);

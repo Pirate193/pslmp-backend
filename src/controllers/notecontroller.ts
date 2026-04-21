@@ -1,19 +1,26 @@
 import  { Context } from "hono";
-import { db } from "..";
+import { db } from "../lib/db";
 import { folders, notes } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
 
 export const getusersnotes = async (c:Context)=>{
     try {
-        const user = c.get("user")
-        const Notes = await db.select().from(notes).where(eq(notes.userId,user.id))
+        const user = c.get("user");
+        const folderId = c.req.query("folderId");
+        let Notes;
+        if(folderId){
+            Notes = await db.select().from(notes).where(and(eq(notes.userId,user.id),eq(notes.folderId,folderId)))
+        }else{
+            Notes = await db.select().from(notes).where(eq(notes.userId,user.id))
+        }
 
         //note am ommiting content because we dont want to send large content just for listing the note 
         return c.json(Notes.map(note=>({
             id:note.id,
             title:note.title,
             folderId:note.folderId,
+            isPinned:note.isPinned,
             createdAt:note.createdAt,
             updatedAt:note.updatedAt
         })))
@@ -44,6 +51,7 @@ export const createnote = async (c:Context)=>{
             title:body.title.trim()|| "untitled",
             content:body.content ?? null,
             folderId:body.folderId ?? null,
+            isPinned:body.isPinned ?? false,
         }).returning();
 
         return c.json(note[0],201)
@@ -76,9 +84,11 @@ export const updatenote = async (c:Context)=>{
              if(folder.length === 0) return c.json({error:"folder not found"},404)
         }
         const note = await db.update(notes).set({
-            title:body.title.trim() ?? existing[0].title,
+            title:body.title?.trim() ?? existing[0].title,
             content:body.content !== undefined ? body.content : existing[0].content,
             folderId:body.folderId !== undefined ? body.folderId :existing[0].folderId,
+            isPinned:body.isPinned !== undefined ? body.isPinned : existing[0].isPinned,
+            updatedAt: new Date()
         }).where(and(eq(notes.id,id),eq(notes.userId,user.id))).returning()
 
      return c.json(note[0],201)
@@ -150,7 +160,7 @@ export const movenote = async (c:Context)=>{
         if (!uuidCheck.success) return c.json({ error: "Invalid ID format" }, 400);
         
         const body = await c.req.json();
-        const parsedData = z.object({ folderId: z.string().uuid().nullable() }).parse(body);
+        const parsedData = z.object({ folderId: z.uuid().nullable().optional() }).parse(body);
 
         const existing = await db.select().from(notes).where(
             and(eq(notes.id, id), eq(notes.userId, user.id))
@@ -177,31 +187,6 @@ export const movenote = async (c:Context)=>{
             success:false,
             error:error,
             message:"error in moving note ",
-        },500)
-    }
-}
-
-export const getfoldernotes = async (c:Context)=>{
-    try {
-        const user = c.get("user");
-        const folderId = c.req.param("id");
-        if (!folderId) return c.json({error:"folder id is required "});
-        
-        const uuidCheck = z.uuid().safeParse(folderId);
-        if (!uuidCheck.success) return c.json({ error: "Invalid ID format" }, 400);
-        const foldernotes = await db.select().from(notes).where(and(eq(notes.folderId,folderId),eq(notes.userId,user.id)));
-        return c.json(foldernotes.map((n)=>({
-            id:n.id,
-            title:n.title,
-            updatedAt:n.updatedAt,
-            createdAt:n.createdAt
-        })))
-    } catch (error) {
-        console.log("error in getting foldernotes",error);
-        return c.json({
-            success:false,
-            error:error,
-            message:"error in getting foldernotes"
         },500)
     }
 }

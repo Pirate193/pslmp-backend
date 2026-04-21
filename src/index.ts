@@ -1,8 +1,5 @@
 import { Hono } from 'hono'
 import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { folders } from './db/schema';
-import { Pool } from "pg";
 import { cors } from 'hono/cors';
 import { auth } from './lib/auth';
 import { requireauth } from './middleware/requireauth';
@@ -11,10 +8,8 @@ import foldersRouter from "./routes/folderroute";
 import templatesRouter from "./routes/templateroute";
 import chatRouter from "./routes/chatsroutes";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
-});
-export const db = drizzle({ client: pool });
+// Re-export db so controllers that `import { db } from ".."` still work
+export { db } from './lib/db';
 
 // Extend Hono's context type so c.get("user") is typed and access  relevant docs to set this up i used docs  in https://better-auth.com/docs/integrations/hono 
 export type Appvariables = {
@@ -28,7 +23,7 @@ app.use(
 	cors({
 		origin: process.env.FRONTEND_URL ?? "http://localhost:3001",
 		allowHeaders: ["Content-Type", "Authorization"],
-		allowMethods: ["POST", "GET","PUT","DELETE", "OPTIONS"],
+		allowMethods: ["POST", "GET","PUT","PATCH","DELETE", "OPTIONS"],
 		credentials: true,
 	}),
 );
@@ -51,6 +46,7 @@ app.get('/me',requireauth, async(c)=>{
 app.route('/api/notes',notesRouter);
 app.route('/api/folders',foldersRouter);
 app.route('/api/templates',templatesRouter);
-app.route('/api/chat',chatRouter);
+app.route('/api/chats',chatRouter);
 
+export type AppType = typeof app;
 export default app

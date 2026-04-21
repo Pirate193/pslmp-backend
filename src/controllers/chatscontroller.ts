@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { db } from "..";
+import { db } from "../lib/db";
 import { chats, messages } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import z from "zod";

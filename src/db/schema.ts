@@ -54,6 +54,8 @@ export const folders = pgTable("folders",{
     userId:text("userId").notNull().references(()=>user.id,{onDelete:"cascade"}),
     name:text("name").notNull(),
     parentId: uuid("parentId").references((): AnyPgColumn => folders.id, { onDelete: "cascade" }),
+    isPinned: boolean("isPinned").default(false).notNull(),
+    color: text("color").default("default").notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 },(table)=>({
@@ -66,6 +68,7 @@ export const notes = pgTable("notes",{
     folderId:uuid("folderId").references(()=>folders.id,{onDelete:"cascade"}),
     title:text("title").notNull().default("untitled"),
     content:jsonb("content"),
+    isPinned:boolean("isPinned").default(false).notNull(),
     updatedAt:timestamp("updatedAt").defaultNow().notNull(),
     createdAt:timestamp("createdAt").defaultNow().notNull()
 },(table)=>({

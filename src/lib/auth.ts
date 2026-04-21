@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "../db/schema"
-import { db } from "..";
+import { db } from "./db";
 import { emailOTP } from "better-auth/plugins";
 import { Resend } from "resend";
 
@@ -39,7 +39,7 @@ export const auth = betterAuth({
     }),
   ],
   trustedOrigins: [
-    process.env.FRONTEND_URL ?? "http://localhost:3000",
+    process.env.FRONTEND_URL ?? "http://localhost:3001",
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
