@@ -111,3 +111,26 @@ export const messages = pgTable("messages",{
    messageChatsIdx:t.index("message_chats_id_idx").on(table.chatId)
 }))
 
+export const apiKeys = pgTable("api_keys", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),          // "openai" | "anthropic" | "google" | "deepseek" | "xai" | "moonshot" | "tavily"
+    encryptedKey: text("encryptedKey").notNull(),   // AES-256-GCM ciphertext (hex)
+    iv: text("iv").notNull(),                       // initialization vector (hex)
+    authTag: text("authTag").notNull(),             // GCM authentication tag (hex)
+    displayHint: text("displayHint").notNull(),     // masked key e.g. "sk-...ab3f"
+    isValid: boolean("isValid").default(true).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (table) => ({
+    apiKeysUserIdx: t.index("api_keys_user_id_idx").on(table.userId),
+    apiKeysUniqueProviderPerUser: t.unique("api_keys_user_provider_unique").on(table.userId, table.provider),
+}))
+
+export const userSettings = pgTable("user_settings", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("userId").notNull().unique().references(() => user.id, { onDelete: "cascade" }),
+    systemPrompt: text("systemPrompt"),            // null = use default
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+})

@@ -151,6 +151,9 @@ export const addmessage = async(c:Context)=>{
             content:body.content,
             parts:body.parts
         }).returning();
+
+        // Update the chat's updatedAt so it sorts correctly in recents
+        await db.update(chats).set({ updatedAt: new Date() }).where(eq(chats.id, id));
         
         return c.json(message,201)        
     } catch (error) {

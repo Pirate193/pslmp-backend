@@ -7,6 +7,8 @@ import notesRouter from "./routes/noteroute";
 import foldersRouter from "./routes/folderroute";
 import templatesRouter from "./routes/templateroute";
 import chatRouter from "./routes/chatsroutes";
+import settingsRouter from "./routes/settingsroute";
+import aiRouter from "./routes/airoute";
 
 // Re-export db so controllers that `import { db } from ".."` still work
 export { db } from './lib/db';
@@ -47,6 +49,8 @@ app.route('/api/notes',notesRouter);
 app.route('/api/folders',foldersRouter);
 app.route('/api/templates',templatesRouter);
 app.route('/api/chats',chatRouter);
+app.route('/api/settings',settingsRouter);
+app.route('/api/ai',aiRouter);
 
 export type AppType = typeof app;
 export default app

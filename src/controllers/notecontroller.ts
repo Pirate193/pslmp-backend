@@ -4,6 +4,32 @@ import { folders, notes } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
 
+/** Extract a plain-text preview (~200 chars) from BlockNote jsonb content */
+function extractPreview(content: unknown, maxLength = 200): string | null {
+    if (!content || !Array.isArray(content)) return null;
+    let text = "";
+    const walk = (blocks: any[]) => {
+        for (const block of blocks) {
+            if (text.length >= maxLength) break;
+            // Extract text from inline content
+            if (Array.isArray(block.content)) {
+                for (const inline of block.content) {
+                    if (inline.type === "text" && inline.text) {
+                        text += inline.text + " ";
+                    }
+                }
+            }
+            // Recurse into children
+            if (Array.isArray(block.children) && block.children.length > 0) {
+                walk(block.children);
+            }
+        }
+    };
+    walk(content);
+    const trimmed = text.trim();
+    return trimmed.length > 0 ? trimmed.slice(0, maxLength) : null;
+}
+
 export const getusersnotes = async (c:Context)=>{
     try {
         const user = c.get("user");
@@ -21,6 +47,7 @@ export const getusersnotes = async (c:Context)=>{
             title:note.title,
             folderId:note.folderId,
             isPinned:note.isPinned,
+            preview: extractPreview(note.content),
             createdAt:note.createdAt,
             updatedAt:note.updatedAt
         })))
