@@ -7,6 +7,7 @@ import { anthropic, createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
 import { createXai, xai } from "@ai-sdk/xai";
 import type { Appvariables } from "../index";
+
 import {
   streamText,
   UIMessage,
@@ -14,6 +15,9 @@ import {
   tool,
   stepCountIs,
 } from "ai";
+import { createTools } from "../lib/tools";
+import { createDeepSeek } from "@ai-sdk/deepseek";
+import { createMoonshotAI } from "@ai-sdk/moonshotai";
 
 const aiRouter = new Hono<{ Variables: Appvariables }>();
 
@@ -68,11 +72,11 @@ function createProviderInstance(provider: string, apiKey: string) {
         case "google":
             return createGoogleGenerativeAI({ apiKey });
         case "deepseek":
-            return createOpenAI({ apiKey, baseURL: "https://api.deepseek.com/v1" });
+            return createDeepSeek({ apiKey });
         case "xai":
             return createXai({ apiKey });
         case "moonshot":
-            return createOpenAI({ apiKey, baseURL: "https://api.moonshot.cn/v1" });
+            return createMoonshotAI({apiKey});
         default:
             throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -101,10 +105,14 @@ aiRouter.post("/chat", requireauth, async (c) => {
     messages,
     webSearch,
     model:modelId,
+    contextFolder,
+    contextNote
   }: {
     messages: UIMessage[];
     webSearch?: boolean;
     model: string;
+    contextFolder?: { id: string, name: string }[];
+    contextNote?: { id: string, title: string }[];
   } = await c.req.json();
 
         if (!modelId || !messages) {
@@ -125,11 +133,10 @@ aiRouter.post("/chat", requireauth, async (c) => {
             }, 400);
         }
 
-        // 3. Get system prompt
-        const systemPrompt = await getEffectiveSystemPrompt(user.id);
+        // 3. Get system prompt with context
+        const systemPrompt = await getEffectiveSystemPrompt(user.id, user.name, contextFolder, contextNote);
 
-        // 4. Build tools (web search if requested)
-        let tools: any = undefined;
+        
         if (webSearch) {
             const tavilyKey = await getDecryptedKey(user.id, "tavily");
             if (!tavilyKey) {
@@ -137,15 +144,15 @@ aiRouter.post("/chat", requireauth, async (c) => {
                     error: "Web search requires a Tavily API key. Add one in Settings → API Keys."
                 }, 400);
             }
-            // AI SDK supports Tavily via tools — this will be implemented
-            // when @ai-sdk/tavily or a custom tool is configured
         }
 
         // 5. Create provider + stream
         const providerInstance = createProviderInstance(provider, apiKey);
+        const modelInstance = providerInstance(modelId);
         const result = streamText({
-            model: providerInstance(modelId),
+            model: modelInstance,
             system: systemPrompt,
+            tools: createTools(c, modelInstance),
             messages:await convertToModelMessages(messages),
             stopWhen:stepCountIs(10)
         });
