@@ -48,6 +48,11 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 5 * 60,
     },
+},
+advanced:{
+  crossSubDomainCookies:{
+    enabled:true,
+  }
 }
 });
 
