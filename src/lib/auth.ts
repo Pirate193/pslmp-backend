@@ -22,7 +22,7 @@ export const auth = betterAuth({
     emailOTP({
         async sendVerificationOTP({email,otp,type}){
         await resend.emails.send({
-          from: "PSLMP <noreply@resend.dev>",
+          from: "PSLMP <noreply@foldex.space>",
           to: email,
           subject: type === "sign-in" ? "Your PSLMP sign-in code" : "Verify your PSLMP account",
           html: `
