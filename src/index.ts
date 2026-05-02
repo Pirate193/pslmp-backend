@@ -23,7 +23,11 @@ const app = new Hono<{ Variables: Appvariables }>();
 app.use(
 	"*", 
 	cors({
-		origin: process.env.FRONTEND_URL ?? "http://localhost:3001",
+		origin: [
+      process.env.FRONTEND_URL ?? "http://localhost:3001",
+      'http://tauri.localhost',     // Tauri Windows App
+      'tauri://localhost'           // Tauri Mac/Linux App
+    ],
 		allowHeaders: ["Content-Type", "Authorization"],
 		allowMethods: ["POST", "GET","PUT","PATCH","DELETE", "OPTIONS"],
 		credentials: true,

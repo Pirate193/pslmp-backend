@@ -40,6 +40,8 @@ export const auth = betterAuth({
   ],
   trustedOrigins: [
     process.env.FRONTEND_URL ?? "http://localhost:3001",
+    'http://tauri.localhost',     // Tauri Windows App
+    'tauri://localhost'           // Tauri Mac/Linux App
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
@@ -51,8 +53,8 @@ export const auth = betterAuth({
 },
 advanced:{
   crossSubDomainCookies:{
-    enabled:true,
-    domain:".foldex.space"
+    enabled: process.env.NODE_ENV === "production",
+    domain: process.env.NODE_ENV === "production" ? ".foldex.space" : undefined,
   }
 }
 });

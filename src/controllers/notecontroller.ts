@@ -73,7 +73,6 @@ export const createnote = async (c:Context)=>{
         }
        
         const note = await db.insert(notes).values({
-            id:body.id,
             userId:user.id,
             title:body.title.trim()|| "untitled",
             content:body.content ?? null,
