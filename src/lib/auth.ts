@@ -53,8 +53,8 @@ export const auth = betterAuth({
 },
 advanced:{
   crossSubDomainCookies:{
-    enabled: process.env.NODE_ENV === "production",
-    domain: process.env.NODE_ENV === "production" ? ".foldex.space" : undefined,
+    enabled: true,
+    domain: ".foldex.space",
   }
 }
 });
