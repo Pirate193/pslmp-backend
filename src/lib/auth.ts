@@ -55,6 +55,10 @@ advanced:{
   crossSubDomainCookies:{
     enabled: true,
     domain: ".foldex.space",
+  },
+  defaultCookieAttributes: {
+      sameSite: "none", 
+      secure: true, 
   }
 }
 });
