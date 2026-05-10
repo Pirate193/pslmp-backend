@@ -1,8 +1,8 @@
 import { tool } from "ai";
 import z from "zod";
 import { db } from "./db";
-import { folders, notes} from "../db/schema";
-import { and, eq } from "drizzle-orm";
+import { folders, notes, videos } from "../db/schema";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { blockNoteToMarkdown, BlockNoteContent, convertSchemaToBlockNote } from "./ai-block-parser";
 import { Context } from "hono";
 import { createNoteContent, updateNoteContent } from "./noteagent";
@@ -479,6 +479,73 @@ Instructions: Cite these sources using [1], [2], [3], etc. in your response.
           return { success: false, error: "YouTube search failed due to network or parsing error" };
         }
       }
+    }),
+
+    generateVideo: tool({
+      description: "Generate an AI-powered Manim explainer video. Use this when the user asks for a visual animation or video explanation of a concept. The video will be rendered in the background and the user will be notified when it's ready. This is a beta feature.",
+      inputSchema: z.object({
+        prompt: z.string().describe("A detailed description of what concept to explain in the video"),
+        folderId: z.string().optional().describe("Optional folder ID to place the video in"),
+      }),
+      execute: async ({ prompt, folderId }) => {
+        try {
+          const { generateManimCode } = await import("./manim-agent");
+          const { videoQueue } = await import("./video-worker");
+
+          // Rate limit: 5 videos per 24h
+          const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+          const [countResult] = await db
+            .select({ count: sql<number>`count(*)::int` })
+            .from(videos)
+            .where(and(eq(videos.userId, user.id), gte(videos.createdAt, twentyFourHoursAgo)));
+          if ((countResult?.count ?? 0) >= 5) {
+            return { success: false, error: "Daily video limit reached (5/day during beta). Try again tomorrow." };
+          }
+
+          // Generate Manim code
+          const manimResult = await generateManimCode({ prompt, model });
+
+          // Insert video row
+          const [video] = await db.insert(videos).values({
+            userId: user.id,
+            folderId: folderId ?? null,
+            creatorname: user.name,
+            creatorprofile: user.image,
+            title: manimResult.title,
+            code: manimResult.code,
+            description: manimResult.description,
+            transcript: manimResult.transcript,
+            tags: manimResult.tags,
+            status: "queued",
+            prompt,
+            isPublic: true,
+          }).returning();
+
+          // Queue render job
+          await videoQueue.add('render-job', {
+            videoId: video.id,
+            code: manimResult.code,
+            sceneName: manimResult.sceneName,
+            retryCount: 0,
+          }, {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 5000 },
+            removeOnComplete: true,
+            removeOnFail: false,
+          });
+
+          console.log("[Tool] generateVideo: queued", video.id);
+          return {
+            success: true,
+            videoId: video.id,
+            title: manimResult.title,
+            message: `Video "${manimResult.title}" is being generated. The user will be notified when it's ready.`,
+          };
+        } catch (error) {
+          console.error("[Tool] generateVideo error:", error);
+          return { success: false, error: `Failed to generate video: ${error}` };
+        }
+      },
     }),
 
   };

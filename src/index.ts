@@ -9,6 +9,7 @@ import templatesRouter from "./routes/templateroute";
 import chatRouter from "./routes/chatsroutes";
 import settingsRouter from "./routes/settingsroute";
 import aiRouter from "./routes/airoute";
+import videoRouter from "./routes/videoroute";
 
 // Re-export db so controllers that `import { db } from ".."` still work
 export { db } from './lib/db';
@@ -55,6 +56,7 @@ app.route('/api/templates',templatesRouter);
 app.route('/api/chats',chatRouter);
 app.route('/api/settings',settingsRouter);
 app.route('/api/ai',aiRouter);
+app.route('/api/videos',videoRouter);
 
 export type AppType = typeof app;
 export default {

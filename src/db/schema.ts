@@ -1,4 +1,4 @@
-import { AnyPgColumn, boolean, index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { AnyPgColumn, boolean, index, integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import * as t from "drizzle-orm/pg-core";
 
 //the user,session,account,verification are copied from the better auth docs see:https://better-auth.com/docs/concepts/database#core-schema 
@@ -134,3 +134,51 @@ export const userSettings = pgTable("user_settings", {
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 })
+
+export const videos = pgTable("videos", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("userId").references(() => user.id, { onDelete: "set null" }),
+    folderId: uuid("folderId").references(() => folders.id, { onDelete: "set null" }),
+    title: text("title"),
+    description: text("description"),
+    transcript: text("transcript"),
+    url: text("url"), // R2 URL
+    filesize: integer("filesize"), // integer is fine for bytes, use bigint if expecting files > 2GB
+    thumbnail: text("thumbnail"),
+    prompt: text("prompt"), // Stored for client-side retry loops
+    isPublic: boolean("isPublic").default(true),
+    status: text("status", { enum: ["queued","generating", "ready", "failed"] }).notNull().default("queued"),
+    // Array of objects { title: string, url: string, snippet: string }
+    sources: jsonb("sources"), 
+    creatorname: text("creatorname"),
+    creatorprofile: text("creatorprofile"),
+    code: text("code"),
+    model: text("model"),
+    tags: jsonb("tags"),  // string[] — auto-generated topic tags
+    errorTraceback: text("error_traceback"),    
+    likes: integer("likes").default(0),
+    dislikes: integer("dislikes").default(0),    
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (table) => ({
+    videosUserIdx: index("videos_user_id_idx").on(table.userId),
+    videosFolderIdx: index("videos_folder_id_idx").on(table.folderId),
+    videosPublicIdx: index("videos_public_idx").on(table.isPublic),
+    videosTitleIdx: index("videos_title_idx").on(table.title),
+    videosUserFolderIdx: index("videos_user_folder_idx").on(table.userId, table.folderId),
+}));
+
+export const videoFeedback = pgTable("video_feedback", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    videoId: uuid("videoId").notNull().references(() => videos.id, { onDelete: "cascade" }),
+    userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade" }),
+    type: text("type", { enum: ["like", "dislike"] }).notNull(),
+    
+    // Array of strings
+    tags: jsonb("tags"),
+    comment: text("comment"),    
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+    feedbackVideoIdx: index("feedback_video_id_idx").on(table.videoId),
+    feedbackUserVideoIdx: index("feedback_user_video_idx").on(table.userId, table.videoId),
+}));
