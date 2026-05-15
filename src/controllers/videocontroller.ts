@@ -236,8 +236,8 @@ export const updatevideo = async(c:Context)=>{
     if(video.userId !== user.id) return c.json({error:"you are not authorized to update this video"},403);
 
     await db.update(videos).set({
-        folderId:body.folderId ?? video.folderId,
-        isPublic:body.isPublic ?? video.isPublic,
+        folderId:body.folderId !== undefined ? body.folderId : video.folderId,
+        isPublic:body.isPublic !== undefined ? body.isPublic : video.isPublic,
         updatedAt:new Date(),
     }).where(eq(videos.id,id));
     return c.json({success:true},200)

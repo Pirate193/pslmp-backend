@@ -165,3 +165,7 @@ export const addmessage = async(c:Context)=>{
         },500)
     }
 }
+
+export const generatesmarttitle = async (c:Context)=>{
+    
+}
