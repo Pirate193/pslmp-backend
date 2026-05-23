@@ -1,4 +1,4 @@
-# Contributing to PSLMP
+# Contributing to foldex
 
 Thanks for wanting to contribute. This document covers everything you need to get from zero to a merged pull request.
 
@@ -40,7 +40,7 @@ If you plan to work on something significant, open an issue first so we can disc
 
 ## Development Setup
 
-### Frontend (pslmp-frontend)
+### Frontend (foldex-frontend)
 
 1. Fork the repo and clone your fork
 2. Install dependencies:
@@ -62,7 +62,7 @@ For the desktop app you also need [Rust](https://rustup.rs) installed, then:
 bunx tauri dev
 ```
 
-### Backend (pslmp-backend)
+### Backend (foldex-backend)
 
 1. Fork and clone
 2. Install dependencies:
@@ -230,10 +230,10 @@ Feature requests that clearly explain the problem are much more likely to be pic
 
 ### Video Renderer (Manim Flask Server)
 
-PSLMP uses a separate Python microservice to render the AI-generated Manim animations into `.mp4` files. If you are working on the video generation feature, you must run this locally.
+foldex uses a separate Python microservice to render the AI-generated Manim animations into `.mp4` files. If you are working on the video generation feature, you must run this locally.
 
 1. Ensure you have Python 3.12 and `ffmpeg` installed on your system.
-2. Clone the renderer repository [pslmp-manim-renderer](https://github.com/Pirate193/pslmp-manim-renderer.git).
+2. Clone the renderer repository [foldex-manim-renderer](https://github.com/Pirate193/foldex-manim-renderer.git).
 3. Create a virtual environment and install dependencies:
    ```bash
    python -m venv venv

@@ -1,4 +1,4 @@
-# PSLMP — Backend
+# Foldex — Backend
 
 > Personalized Self-Learning Management Platform — API server.
 
@@ -7,10 +7,10 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-REST API and AI streaming backend for PSLMP. Built with Hono, Drizzle ORM, and PostgreSQL. Handles authentication, note/folder/template/video CRUD and AI chat streaming with tool calls .
+REST API and AI streaming backend for foldex. Built with Hono, Drizzle ORM, and PostgreSQL. Handles authentication, note/folder/template/video CRUD and AI chat streaming with tool calls .
 
-**Frontend repo → [pslmp-frontend](https://github.com/Pirate193/pslmp-frontend)**
-**ManimRenderer repo->[pslmp-manim-renderer](https://github.com/Pirate193/pslmp-manim-renderer.git)**
+**Frontend repo → [foldex-frontend](https://github.com/Pirate193/foldex-frontend)**
+**ManimRenderer repo->[foldex-manim-renderer](https://github.com/Pirate193/foldex-manim-renderer.git)**
 
 ---
 
@@ -81,8 +81,8 @@ REST API and AI streaming backend for PSLMP. Built with Hono, Drizzle ORM, and P
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/Pirate193/pslmp-backend.git
-cd pslmp-backend
+git clone https://github.com/Pirate193/foldex-backend.git
+cd foldex-backend
 bun install
 ```
 
@@ -93,7 +93,7 @@ docker compose up -d
 ```
 
 ```bash
-docker run -d --name pslmp-redis -p 6379:6379 redis:alpine
+docker run -d --name foldex-redis -p 6379:6379 redis:alpine
 ```
 
 This starts a PostgreSQL 16 container on port 5432 using the config in `docker-compose.yml`.
@@ -105,7 +105,7 @@ cp .env.example .env
 ```
 
 ```env
-DATABASE_URL=postgresql://postgres:postgrespassword@localhost:5432/pslmp
+DATABASE_URL=postgresql://postgres:postgrespassword@localhost:5432/foldex
 RESEND_API_KEY=re_your_key_here
 BETTER_AUTH_SECRET=generate-with-openssl-rand-base64-32
 FRONTEND_URL=http://localhost:3001
@@ -196,8 +196,8 @@ The backend is deployed via [Dokploy](https://dokploy.com) using Docker. A `Dock
 
 ```bash
 # Build image locally to verify
-docker build -t pslmp-backend .
-docker run -p 3000:3000 --env-file .env pslmp-backend
+docker build -t foldex-backend .
+docker run -p 3000:3000 --env-file .env foldex-backend
 ```
 
 ---

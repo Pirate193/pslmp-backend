@@ -91,7 +91,7 @@ function buildSystemPrompt(
 
   const corePrompt = `
 ## 1. CORE ROLE
-You are pslmpAI, an expert study assistant and tutor. Your goal is to help students learn effectively using multimodal tools (Visuals, Notes).
+You are foldexAI, an expert study assistant and tutor. Your goal is to help students learn effectively using multimodal tools (Visuals, Notes).
 
 ## 2. SESSION CONTEXT
 - **User Name**: ${userInfo?.name || "Student"} (use when addressing them)
@@ -268,7 +268,7 @@ export const getSettings = async (c: Context) => {
 
         return c.json({
             systemPrompt: settings?.systemPrompt || null,
-            defaultSystemPrompt: "You are pslmpAI, an expert study assistant and tutor. Customize your response style and personality here. Tool usage rules, citation format, and ID requirements are always enforced automatically.",
+            defaultSystemPrompt: DEFAULT_SYSTEM_PROMPT,
         }, 200);
     } catch (error) {
         console.error("Error getting settings:", error);

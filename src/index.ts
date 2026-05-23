@@ -40,7 +40,7 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
 });
 
 app.get('/', (c) => {
-  return c.text('pslmp backend is running !')
+  return c.text('foldex backend is running !')
 })
 
 app.get('/me',requireauth, async(c)=>{

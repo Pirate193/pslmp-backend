@@ -22,9 +22,9 @@ export const auth = betterAuth({
     emailOTP({
         async sendVerificationOTP({email,otp,type}){
         await resend.emails.send({
-          from: "PSLMP <noreply@foldex.space>",
+          from: "foldex <noreply@foldex.space>",
           to: email,
-          subject: type === "sign-in" ? "Your PSLMP sign-in code" : "Verify your PSLMP account",
+          subject: type === "sign-in" ? "Your foldex sign-in code" : "Verify your foldex account",
           html: `
             <div style="font-family:sans-serif;max-width:400px;margin:0 auto">
               <h2>Your one-time code</h2>
